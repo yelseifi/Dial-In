@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String     @id @default(uuid())
+  email      String     @unique
+  name       String?
+  phoneNuber String
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  bounties   Bounty[]
+  claimants  Claimant[]
+}
+
+model Bounty {
+  id                String       @id @default(uuid())
+  artist            String
+  trackTitle        String
+  description       String?
+  email             String
+  phoneNumber       String
+  supportingArtists String[]
+  reward            Float
+  proofImageUrls    String[]
+  claimants         Claimant[]
+  songUrl           String?
+  status            BountyStatus @default(PENDING)
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  userId            String?
+  user              User?        @relation(fields: [userId], references: [id])
+  videoUrls         String[]
+}
+
+model Claimant {
+  id          String         @id @default(uuid())
+  bountyId    String?
+  name        String
+  email       String
+  phoneNumber String
+  status      ClaimantStatus @default(PENDING)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  userId      String?
+  videoUrl    String?
+  artists     String[]
+  description String?
+  dateSeeing  DateTime?      
+  bounty      Bounty?         @relation(fields: [bountyId], references: [id])
+  user        User?          @relation(fields: [userId], references: [id])
+}
+
+model Video {
+  id                String        @id @default(uuid())
+  videoUrl          String?    
+  key               String?        
+  bountyId          String?
+  claimId           String?
+  uploadedByUserId  String
+  description       String?
+  createdAt         DateTime      @default(now())
+}
+
+enum BountyStatus {
+  PENDING
+  APPROVED
+  ACTIVE
+  CLAIMED
+  COMPLETED
+  REJECTED
+}
+
+enum ClaimantStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  COMPLETED
+}
